@@ -4,6 +4,7 @@
 #include "lib/cache.h"
 #include "server.h"
 
+//接受网络数据并写入缓存
 void* recv_and_write_cache(void *cache1) {
     printf("%s", "recv_and_write_cache\n");
     struct Cache *cache = (struct Cache*)cache1;
@@ -18,6 +19,7 @@ void* recv_and_write_cache(void *cache1) {
     }
 }
 
+// 读取缓存数据并写入声卡
 void read_cache_and_play(struct Cache *cache) {
     printf("%s", "read_cache_and_play\n");
     int readSize;

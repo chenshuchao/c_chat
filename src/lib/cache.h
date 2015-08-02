@@ -11,7 +11,6 @@ struct ListNode {
 
 struct ListNode* listnode_new(int size);
 
-
 struct Cache {
     struct ListNode *readIndex;
     struct ListNode *writeIndex;
