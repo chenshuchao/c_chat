@@ -83,6 +83,9 @@ struct SoundInfo* sound_info_new() {
     }
 
     info->bufferSize = info->frames * 4;
+    //test
+    info->bufferSize = 3;
+
     info->buffer = (char*)malloc(info->bufferSize);
 
     return info;
@@ -90,7 +93,7 @@ struct SoundInfo* sound_info_new() {
 
 void sound_info_record(struct SoundInfo *info) {
     int rc;
-
+/*
     rc = snd_pcm_readi(info->handle, info->buffer, info->frames);
     if(rc == -EPIPE){
         fprintf(stderr, "overrun occurred\n");
@@ -102,6 +105,12 @@ void sound_info_record(struct SoundInfo *info) {
     else if(rc != (int)info->frames){
         fprintf(stderr, "short read, read %d frames\n", rc);
     }
+*/
+    //test
+    info->buffer[0] = 'a';
+    info->buffer[1] = 'b';
+    info->buffer[2] = 'c';
+
     //info->bufferSize = rc;
 }
 

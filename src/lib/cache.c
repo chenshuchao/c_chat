@@ -6,14 +6,8 @@
 
 struct ListNode* listnode_new(int size) {
     struct ListNode *node = (struct ListNode*)malloc(sizeof(struct ListNode));
-    if(node == NULL) {
-        perror("malloc error");
-    }
     node->buffer = (char*)malloc(size);
     bzero(node->buffer, size);
-    if(node->buffer == NULL) {
-        perror("malloc error");
-    }
     node->bufferSize = size;
     node->next = NULL;
     return node;
@@ -46,6 +40,7 @@ void cache_write(struct Cache *cache, char *buffer, int size) {
     printf("%s\n", "buffercpy in cache_write");
     buffercpy(p->buffer, buffer, size);
      
+    printf("-------%d--------------------%c\n", size, p->buffer[1]);
     if(cache->writeIndex == NULL) {
         cache->writeIndex = p;
         printf("%s\n", "hiIamNULL");
