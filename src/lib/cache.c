@@ -19,8 +19,8 @@ void listnode_free(struct ListNode *node) {
         free(node->buffer);
         node->buffer = NULL;
     }
-    //free(node);
-    //node = NULL;
+    free(node);
+    node = NULL;
 }
 
 struct Cache* cache_new() {
@@ -40,7 +40,7 @@ void cache_write(struct Cache *cache, char *buffer, int size) {
     printf("%s\n", "buffercpy in cache_write");
     buffercpy(p->buffer, buffer, size);
      
-    printf("-------%d--------------------%c\n", size, p->buffer[1]);
+    printf("-------%d--------------------%c\n", size, p->buffer[4095]);
     if(cache->writeIndex == NULL) {
         cache->writeIndex = p;
         printf("%s\n", "hiIamNULL");
@@ -76,6 +76,7 @@ char* cache_read(struct Cache *cache, int *readSize) {
 
     listnode_free(t);
     printf("cache read: %d\n", *readSize);
+    printf("-------%d--------------------%c\n", *readSize, buffer[4095]);
     return buffer;
 }
 
