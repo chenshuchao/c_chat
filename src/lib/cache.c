@@ -6,14 +6,8 @@
 
 struct ListNode* listnode_new(int size) {
     struct ListNode *node = (struct ListNode*)malloc(sizeof(struct ListNode));
-    if(node == NULL) {
-        perror("malloc error");
-    }
     node->buffer = (char*)malloc(size);
     bzero(node->buffer, size);
-    if(node->buffer == NULL) {
-        perror("malloc error");
-    }
     node->bufferSize = size;
     node->next = NULL;
     return node;
@@ -31,6 +25,7 @@ void listnode_free(struct ListNode *node) {
 
 struct Cache* cache_new() {
     struct Cache *cache = (struct Cache*)malloc(sizeof(struct Cache));
+    cache->chuncks = 0;
     cache->readIndex = NULL;
     cache->writeIndex = NULL;
     return cache;
@@ -38,49 +33,30 @@ struct Cache* cache_new() {
 
 void cache_write(struct Cache *cache, char *buffer, int size) {
     struct ListNode *p = listnode_new(size);
-    printf("%p\n", p->buffer);
-    if(p->buffer == NULL) {
-        printf("%s\n", "paaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        exit(1);
-    }
-    printf("%s\n", "buffercpy in cache_write");
     buffercpy(p->buffer, buffer, size);
      
     if(cache->writeIndex == NULL) {
         cache->writeIndex = p;
-        printf("%s\n", "hiIamNULL");
     } else {
         cache->writeIndex->next = p;
         cache->writeIndex = cache->writeIndex->next;
-        printf("%s\n", "hiIamnotNULL");
-    }
-
-    if(cache->writeIndex->buffer == NULL) {
-        printf("%s\n", "writeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        exit(1);
     }
 
     if(cache->readIndex == NULL) cache->readIndex = cache->writeIndex;
-    printf("cache write: %d\n", size);
+    
+    cache->chuncks++;
+    cache->chuncks = cache->chuncks % 10000;
 }
 
 char* cache_read(struct Cache *cache, int *readSize) {
-    //if(cache->readIndex == NULL) return;
-
     *readSize = cache->readIndex->bufferSize;
     char *buffer = (char*)malloc(*readSize);
-    printf("%s\n", "buffercpy in cache_read");
     ListNode *t = cache->readIndex;
-
-    if(cache->readIndex->buffer == NULL) {
-        printf("%s\n", "buffer NULL");
-    }
-
     buffercpy(buffer, cache->readIndex->buffer, *readSize);
     cache->readIndex = cache->readIndex->next;
 
     listnode_free(t);
-    printf("cache read: %d\n", *readSize);
+
     return buffer;
 }
 
@@ -92,6 +68,7 @@ void cache_free(struct Cache *cache) {
     while(cache->readIndex) {
         listnode_free(cache->readIndex);
     }
+
     free(cache);
     cache = NULL;
 }

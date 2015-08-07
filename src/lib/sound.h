@@ -13,7 +13,9 @@ struct SoundInfo {
     int bufferSize;
 };
 
-struct SoundInfo* sound_info_new();
+struct SoundInfo* sound_info_play_new();
+
+struct SoundInfo* sound_info_record_new();
 
 void sound_info_record(struct SoundInfo *info);
 

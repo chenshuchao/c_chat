@@ -14,7 +14,7 @@ struct Client {
     struct sockaddr_in addr;
 };
 
-struct Client* client_init(char ip[], int port);
+struct Client* client_init(const char *ip, int port);
 
 char* client_recv(int serSock, int bufferSize, int *recvSize);
 

@@ -2,6 +2,7 @@
 
 int server_init(int port) {
     printf("%s\n", "server init");
+
     int serverSock;
     struct sockaddr_in serverAddr;
     serverSock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -14,24 +15,22 @@ int server_init(int port) {
         perror("bind error");
         exit(1);
     }
+
     return serverSock;    
 }
 
-/*
-void server_send() {
-    
-}
-*/
-
 char* server_recv(int serSock, int bufferSize, int *recvSize) {
     printf("%s\n","recving...");
+
     struct sockaddr_in cliAddr;
     socklen_t cliAddrLen = sizeof(cliAddr);    
     char *buffer = (char*)malloc(bufferSize);
-    if((*recvSize = recvfrom(serSock, (void*)buffer, bufferSize, 0, (struct sockaddr*)&cliAddr, &cliAddrLen)) < 0) {
+
+    if((*recvSize = recvfrom(serSock, (void*)buffer, bufferSize, 0,
+                       (struct sockaddr*)&cliAddr, &cliAddrLen)) < 0) {
         perror("recvfrom error");
     }
-    printf("%s\n","recving end ");
+
     return buffer;
 }
 
