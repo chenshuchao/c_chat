@@ -1,15 +1,14 @@
-//#include <stdio.h>
 #include <alsa/asoundlib.h>
 #include "sound.h"
 
-struct SoundInfo* sound_info_new() {
+struct SoundInfo* sound_info_play_new() {
     struct SoundInfo *info = (struct SoundInfo*)malloc(sizeof(struct SoundInfo));
     int rc;
     int dir = 0;
-
     info->channels = 2; 
     info->frequency = 44100;
     info->bit = 16;
+
     rc=snd_pcm_open(&(info->handle), "default", SND_PCM_STREAM_PLAYBACK, 0);
     if(rc<0) {
         perror("\nopen PCM device failed:");
@@ -91,34 +90,62 @@ struct SoundInfo* sound_info_new() {
     return info;
 }
 
+struct SoundInfo* sound_info_record_new() {
+    struct SoundInfo *info = (struct SoundInfo*)malloc(sizeof(struct SoundInfo));
+    int rc;
+    int dir = 0;
+    int loops;
+
+    info->channels = 2; 
+    info->frequency = 44100;
+
+    rc = snd_pcm_open(&info->handle,
+                "default",
+                SND_PCM_STREAM_CAPTURE, 0);
+    snd_pcm_hw_params_alloca(&info->params);
+    rc = snd_pcm_hw_params_any(info->handle, info->params);
+    rc = snd_pcm_hw_params_set_access(info->handle,
+                 info->params,
+                SND_PCM_ACCESS_RW_INTERLEAVED);
+    snd_pcm_hw_params_set_format(info->handle,
+                info->params,
+                SND_PCM_FORMAT_S16_LE);
+    rc = snd_pcm_hw_params_set_channels(info->handle,
+                         info->params,
+                         info->channels);
+    unsigned int val = info->frequency;
+    rc = snd_pcm_hw_params_set_rate_near(info->handle,
+                        info->params, &val, &dir);
+    rc = snd_pcm_hw_params(info->handle, info->params);
+    info->frames = 32;//"frames"=channel*size/8=4, frames = "frames"*8
+    //one period contains 8 "frames"    
+    snd_pcm_hw_params_set_period_size_near(info->handle,
+                         info->params, &info->frames, &dir);
+    rc = snd_pcm_hw_params(info->handle, info->params);
+    snd_pcm_hw_params_get_period_size(info->params, &info->frames, &dir);
+
+    info->bufferSize = info->frames * 4;
+    info->buffer = (char*) malloc(info->bufferSize);
+    snd_pcm_hw_params_get_period_time(info->params, &val, &dir);
+    memset(info->buffer, 0, info->bufferSize);
+
+    return info;
+}
+
 void sound_info_record(struct SoundInfo *info) {
     int rc;
+
     rc = snd_pcm_readi(info->handle, info->buffer, info->frames);
     if(rc == -EPIPE){
         fprintf(stderr, "overrun occurred\n");
-        printf("%s, rc = %d \n", "overrun occurred", rc);
         snd_pcm_prepare(info->handle);
     }
     else if(rc<0) {
         fprintf(stderr, "error from read; %s\n", snd_strerror(rc));
-        printf("%s, rc = %d \n", "error read", rc);
     }
     else if(rc != (int)info->frames){
         fprintf(stderr, "short read, read %d frames\n", rc);
-        printf("%s, rc = %d \n", "short read", rc);
-    } else {
-        printf("%s, rc = %d \n, buffer[100] = %c ", "run normal", rc, info->buffer[100]);
     }
-
-    //test
-/*
-    info->buffer[0] = 'a';
-    info->buffer[1] = 'b';
-    info->buffer[2] = 'c';
-    info->buffer[4095] = 'k';
-*/
-    printf("-hi-----%d-------------------- %c ----\n", rc, info->buffer[0]);
-    info->bufferSize = rc;
 }
 
 void sound_info_play(struct SoundInfo *info) {

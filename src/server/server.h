@@ -18,3 +18,4 @@ void server_send(struct Server *ser);
 char* server_recv(int serSock, int bufferSize, int *recvSize);
 
 #endif
+
