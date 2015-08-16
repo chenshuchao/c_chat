@@ -28,9 +28,8 @@ void read_cache_and_play(struct Cache *cache) {
     struct SoundInfo *soundInfo = sound_info_play_new();
 
     while(1) {
-        if(!is_cache_readable(cache) || cache->chuncks < 50) continue;
         
-        buffer = cache_read(cache, &readSize);
+        if(!cache_read(cache, &buffer, &readSize)) continue;
         bzero(soundInfo->buffer, soundInfo->bufferSize);
         buffercpy(soundInfo->buffer, buffer, readSize);
         sound_info_play(soundInfo);

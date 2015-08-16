@@ -28,13 +28,19 @@ struct Cache* cache_new() {
     cache->chuncks = 0;
     cache->readIndex = NULL;
     cache->writeIndex = NULL;
+    if(pthread_rwlock_init(&cache->lock, NULL) != 0) {
+        perror("Lock init error!");
+        exit(1);
+    }
+    
     return cache;
 }
 
 void cache_write(struct Cache *cache, char *buffer, int size) {
     struct ListNode *p = listnode_new(size);
     buffercpy(p->buffer, buffer, size);
-     
+    // lock
+    pthread_rwlock_wrlock(&cache->lock); 
     if(cache->writeIndex == NULL) {
         cache->writeIndex = p;
     } else {
@@ -46,18 +52,29 @@ void cache_write(struct Cache *cache, char *buffer, int size) {
     
     cache->chuncks++;
     cache->chuncks = cache->chuncks % 10000;
+
+    pthread_rwlock_unlock(&cache->lock); 
 }
 
-char* cache_read(struct Cache *cache, int *readSize) {
-    *readSize = cache->readIndex->bufferSize;
-    char *buffer = (char*)malloc(*readSize);
-    ListNode *t = cache->readIndex;
-    buffercpy(buffer, cache->readIndex->buffer, *readSize);
-    cache->readIndex = cache->readIndex->next;
+bool cache_read(struct Cache *cache, char **buffer, int *readSize) {
+    pthread_rwlock_wrlock(&cache->lock); 
 
-    listnode_free(t);
+    bool readStatus = false; 
+    if(is_cache_readable(cache) == 1) {
+	
+        readStatus = true;
+        *readSize = cache->readIndex->bufferSize;
+        *buffer = (char*)malloc(*readSize);
+        ListNode *t = cache->readIndex;
+        buffercpy(*buffer, cache->readIndex->buffer, *readSize);
+        cache->readIndex = cache->readIndex->next;
 
-    return buffer;
+        listnode_free(t);
+
+    }
+    pthread_rwlock_unlock(&cache->lock); 
+
+    return readStatus;
 }
 
 int is_cache_readable(struct Cache *cache) {
@@ -65,6 +82,7 @@ int is_cache_readable(struct Cache *cache) {
 }
 
 void cache_free(struct Cache *cache) {
+    pthread_rwlock_destroy(&cache->lock);
     while(cache->readIndex) {
         listnode_free(cache->readIndex);
     }

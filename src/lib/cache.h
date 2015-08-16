@@ -2,6 +2,7 @@
 #define __CACHE_H__
 
 #include <stdlib.h>
+#include <pthread.h>
 
 struct ListNode {
     char* buffer;
@@ -15,13 +16,14 @@ struct Cache {
     int chuncks;
     struct ListNode *readIndex;
     struct ListNode *writeIndex;
+    pthread_rwlock_t lock;
 };
 
 struct Cache* cache_new();
 
 void cache_write(struct Cache *cache, char *buffer, int bufferSize);
 
-char* cache_read(struct Cache *cache, int *readSize);
+bool cache_read(struct Cache *cache, char **buffer, int *readSize);
 
 int is_cache_readable(struct Cache *cache);
 

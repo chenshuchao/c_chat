@@ -12,9 +12,8 @@ void read_cache_and_send(struct Cache *cache) {
     struct Client *client = client_init("127.0.0.1", 5011);
 
     while(1) {
-        if(is_cache_readable(cache) == 0) continue;
 
-        buffer = cache_read(cache, &recvSize);
+        if(!cache_read(cache, &buffer, &recvSize)) continue;
         if(recvSize) {
             client_send(client, buffer, recvSize);
         }
