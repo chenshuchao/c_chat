@@ -10,12 +10,11 @@ Ubuntu(非虚拟机)下运行
     sudo apt-get install libasound2-dev alsa-oss alsa-utils
 
 ### 编译代码
-    git clone https://github.com/chenshuchao/c_chat.git
-    cd c_chat
-    g++ src/lib/utils.c src/lib/sound.c src/lib/cache.c src/client/client.c src/client/main.c -I ./src -lasound -pthread -o client
-    g++ src/lib/utils.c src/lib/sound.c src/lib/cache.c src/server/server.c src/server/main.c -I ./src -lasound -pthread -o server
+    git clone https://github.com/chenshuchao/c_chat.git && cd c_chat
+    g++ lib/utils.c lib/sound.c lib/cache.c client/client.c client/main.c -I ./ -lasound -pthread -o cli
+    g++ lib/utils.c lib/sound.c lib/cache.c server/server.c server/main.c -I ./ -lasound -pthread -o ser
 
 ### 启动
-    ./server
-    ./client
+    ./ser
+    ./cli
 

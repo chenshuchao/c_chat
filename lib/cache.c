@@ -92,9 +92,7 @@ int is_cache_readable(struct Cache *cache) {
 
 // 缓存一段后再播放 todo
 int is_cache_buffer_enough(struct Cache *cache) {
-    pthread_rwlock_rdlock(&cache->lock);
     return (cache->chuncks > 50) ? 1 : 0;
-    pthread_rwlock_unlock(&cache->lock);
 }
 
 // 销毁缓存链表
