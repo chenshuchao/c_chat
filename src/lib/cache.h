@@ -27,6 +27,8 @@ int cache_read(struct Cache *cache, char **buffer, int *readSize);
 
 int is_cache_readable(struct Cache *cache);
 
+int is_cache_buffer_enough(struct Cache *cache);
+
 void cache_free(struct Cache *cache);
 
 #endif

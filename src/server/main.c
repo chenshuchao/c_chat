@@ -4,6 +4,7 @@
 #include "lib/cache.h"
 #include "server.h"
 
+// 接收数据并写入缓存
 void* recv_and_write_cache(void *cache1) {
     printf("%s", "recv_and_write_cache\n");
 
@@ -20,6 +21,7 @@ void* recv_and_write_cache(void *cache1) {
     }
 }
 
+// 从缓存读取数据并写入声卡
 void read_cache_and_play(struct Cache *cache) {
     printf("%s", "read_cache_and_play\n");
 
@@ -29,7 +31,7 @@ void read_cache_and_play(struct Cache *cache) {
 
     while(1) {
         
-        if(!cache_read(cache, &buffer, &readSize)) continue;
+        if(!cache_read(cache, &buffer, &readSize) || !is_cache_buffer_enough(cache)) continue;
         bzero(soundInfo->buffer, soundInfo->bufferSize);
         buffercpy(soundInfo->buffer, buffer, readSize);
         sound_info_play(soundInfo);

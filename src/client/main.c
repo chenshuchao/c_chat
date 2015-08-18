@@ -4,6 +4,7 @@
 #include "lib/cache.h"
 #include "client.h"
 
+// 读取缓存并发送
 void read_cache_and_send(struct Cache *cache) {
     printf("%s", "read_cache_and_send\n");
 
@@ -22,6 +23,7 @@ void read_cache_and_send(struct Cache *cache) {
     }
 }
 
+// 从声卡采集信息并写入缓存结构
 void* record_and_write_cache(void *cache1) {
     printf("%s", "record_and_write_cache\n");
 

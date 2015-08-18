@@ -1,6 +1,7 @@
 #include <alsa/asoundlib.h>
 #include "sound.h"
 
+// 声卡播放初始化
 struct SoundInfo* sound_info_play_new() {
     struct SoundInfo *info = (struct SoundInfo*)malloc(sizeof(struct SoundInfo));
     int rc;
@@ -89,6 +90,24 @@ struct SoundInfo* sound_info_play_new() {
     return info;
 }
 
+// 声卡播放数据
+void sound_info_play(struct SoundInfo *info) {
+   
+    int rc; 
+    while((rc = snd_pcm_writei(info->handle, info->buffer, info->frames)) < 0) {
+        usleep(2000);
+        if (rc == -EPIPE) {
+            fprintf(stderr, "underrun occurred\n");
+            //完成硬件参数设置，使设备准备好
+            snd_pcm_prepare(info->handle);
+        } else if (rc < 0) {
+            fprintf(stderr, "error from writei: %s\n",
+            snd_strerror(rc));
+        }
+   }
+}
+
+// 声卡采集初始化
 struct SoundInfo* sound_info_record_new() {
     struct SoundInfo *info = (struct SoundInfo*)malloc(sizeof(struct SoundInfo));
     int rc;
@@ -129,6 +148,7 @@ struct SoundInfo* sound_info_record_new() {
     return info;
 }
 
+// 声卡采集数据
 void sound_info_record(struct SoundInfo *info) {
     int rc;
 
@@ -145,22 +165,7 @@ void sound_info_record(struct SoundInfo *info) {
     }
 }
 
-void sound_info_play(struct SoundInfo *info) {
-   
-    int rc; 
-    while((rc = snd_pcm_writei(info->handle, info->buffer, info->frames)) < 0) {
-        usleep(2000);
-        if (rc == -EPIPE) {
-            fprintf(stderr, "underrun occurred\n");
-            //完成硬件参数设置，使设备准备好
-            snd_pcm_prepare(info->handle);
-        } else if (rc < 0) {
-            fprintf(stderr, "error from writei: %s\n",
-            snd_strerror(rc));
-        }
-   }
-}
-
+// 释放资源
 void sound_info_free(struct SoundInfo *info) {
     
     snd_pcm_drain(info->handle);

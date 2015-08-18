@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "cache.h"
 
+// 新建缓存链表结点
 struct ListNode* listnode_new(int size) {
     struct ListNode *node = (struct ListNode*)malloc(sizeof(struct ListNode));
     node->buffer = (char*)malloc(size);
@@ -13,6 +14,7 @@ struct ListNode* listnode_new(int size) {
     return node;
 }
 
+// 销毁缓存链表结点
 void listnode_free(struct ListNode *node) {
     if(node == NULL) return;
     if(node->buffer != NULL) {
@@ -23,6 +25,7 @@ void listnode_free(struct ListNode *node) {
     node = NULL;
 }
 
+// 新建缓存链表
 struct Cache* cache_new() {
     struct Cache *cache = (struct Cache*)malloc(sizeof(struct Cache));
     cache->chuncks = 0;
@@ -32,14 +35,15 @@ struct Cache* cache_new() {
         perror("Lock init error!");
         exit(1);
     }
-    
     return cache;
 }
 
+// 将数据写入缓存链表尾部
 void cache_write(struct Cache *cache, char *buffer, int size) {
     struct ListNode *p = listnode_new(size);
     buffercpy(p->buffer, buffer, size);
-    // lock
+
+    // 加读写锁
     pthread_rwlock_wrlock(&cache->lock); 
     if(cache->writeIndex == NULL) {
         cache->writeIndex = p;
@@ -56,7 +60,10 @@ void cache_write(struct Cache *cache, char *buffer, int size) {
     pthread_rwlock_unlock(&cache->lock); 
 }
 
+// 从缓存结构链表中读取数据，并销毁被读取过的结点
 int cache_read(struct Cache *cache, char **buffer, int *readSize) {
+
+    // 加读写锁
     pthread_rwlock_wrlock(&cache->lock); 
 
     int readStatus = 0; 
@@ -65,7 +72,7 @@ int cache_read(struct Cache *cache, char **buffer, int *readSize) {
         readStatus = 1;
         *readSize = cache->readIndex->bufferSize;
         *buffer = (char*)malloc(*readSize);
-        ListNode *t = cache->readIndex;
+        struct ListNode *t = cache->readIndex;
         buffercpy(*buffer, cache->readIndex->buffer, *readSize);
         cache->readIndex = cache->readIndex->next;
          
@@ -78,10 +85,19 @@ int cache_read(struct Cache *cache, char **buffer, int *readSize) {
     return readStatus;
 }
 
+// 判断缓存链表中是否有数据
 int is_cache_readable(struct Cache *cache) {
     return (cache->readIndex == NULL) ? 0 : 1;
 }
 
+// 缓存一段后再播放 todo
+int is_cache_buffer_enough(struct Cache *cache) {
+    pthread_rwlock_rdlock(&cache->lock);
+    return (cache->chuncks > 50) ? 1 : 0;
+    pthread_rwlock_unlock(&cache->lock);
+}
+
+// 销毁缓存链表
 void cache_free(struct Cache *cache) {
     pthread_rwlock_destroy(&cache->lock);
     while(cache->readIndex) {
