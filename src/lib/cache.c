@@ -19,8 +19,8 @@ void listnode_free(struct ListNode *node) {
         free(node->buffer);
         node->buffer = NULL;
     }
-    //free(node);
-    //node = NULL;
+    free(node);
+    node = NULL;
 }
 
 struct Cache* cache_new() {
@@ -56,19 +56,20 @@ void cache_write(struct Cache *cache, char *buffer, int size) {
     pthread_rwlock_unlock(&cache->lock); 
 }
 
-bool cache_read(struct Cache *cache, char **buffer, int *readSize) {
+int cache_read(struct Cache *cache, char **buffer, int *readSize) {
     pthread_rwlock_wrlock(&cache->lock); 
 
-    bool readStatus = false; 
+    int readStatus = 0; 
     if(is_cache_readable(cache) == 1) {
 	
-        readStatus = true;
+        readStatus = 1;
         *readSize = cache->readIndex->bufferSize;
         *buffer = (char*)malloc(*readSize);
         ListNode *t = cache->readIndex;
         buffercpy(*buffer, cache->readIndex->buffer, *readSize);
         cache->readIndex = cache->readIndex->next;
-
+         
+        if(t == cache->writeIndex) cache->writeIndex = NULL;
         listnode_free(t);
 
     }

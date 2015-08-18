@@ -23,7 +23,7 @@ struct Cache* cache_new();
 
 void cache_write(struct Cache *cache, char *buffer, int bufferSize);
 
-bool cache_read(struct Cache *cache, char **buffer, int *readSize);
+int cache_read(struct Cache *cache, char **buffer, int *readSize);
 
 int is_cache_readable(struct Cache *cache);
 
